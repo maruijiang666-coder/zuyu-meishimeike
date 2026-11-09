@@ -1,0 +1,30 @@
+# 美刻科技官网 · systemd 服务示例（不使用 Docker 时）
+#
+# 安装步骤（假设代码部署在 /opt/meike-site）：
+#   sudo cp deploy/meike-site.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now meike-site
+#
+# 说明：应用会自动读取 /opt/meike-site/.env；端口以 ExecStart 中的 8700 为准。
+# 前面的 Nginx 配置监听 443，并把请求转发到 127.0.0.1:8700。
+
+[Unit]
+Description=Meike Technology company site (FastAPI)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/meike-site
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/meike-site/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8700 --proxy-headers --forwarded-allow-ips=*
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/opt/meike-site/data
+
+[Install]
+WantedBy=multi-user.target

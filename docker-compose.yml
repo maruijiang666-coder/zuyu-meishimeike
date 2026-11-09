@@ -1,0 +1,33 @@
+services:
+  web:
+    build: .
+    container_name: meike-site
+    restart: unless-stopped
+    environment:
+      APP_TIMEZONE: "${APP_TIMEZONE:-Asia/Shanghai}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-meike2026}"
+      DATA_DIR: "/app/data"
+      CHAT_AUTO_REPLY: "${CHAT_AUTO_REPLY:-true}"
+      MESSAGE_RATE_LIMIT: "${MESSAGE_RATE_LIMIT:-20}"
+      COMPANY_NAME: "${COMPANY_NAME:-云南美刻网络科技有限公司}"
+      COMPANY_SHORT: "${COMPANY_SHORT:-美刻科技}"
+      COMPANY_EN: "${COMPANY_EN:-MEIKE TECH}"
+      COMPANY_SLOGAN: "${COMPANY_SLOGAN:-把好想法，做成好产品}"
+      COMPANY_SERVICE_AREA: "${COMPANY_SERVICE_AREA:-云南}"
+      COMPANY_PHONE: "${COMPANY_PHONE:-}"
+      COMPANY_WECHAT: "${COMPANY_WECHAT:-}"
+      COMPANY_EMAIL: "${COMPANY_EMAIL:-}"
+      COMPANY_ADDRESS: "${COMPANY_ADDRESS:-}"
+      COMPANY_ICP: "${COMPANY_ICP:-}"
+      SITE_URL: "${SITE_URL:-}"
+    ports:
+      # 只监听本机，交给 Nginx 反向代理；直接对外访问可改成 "8700:8700"
+      - "127.0.0.1:${APP_PORT:-8700}:8700"
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8700/healthz', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
