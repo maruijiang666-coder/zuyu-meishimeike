@@ -1,14 +1,36 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        PIP_INDEX_URL: "${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}"
     container_name: meike-site
     restart: unless-stopped
     environment:
+      # 复用宿主机上已有的 PostgreSQL（不要在本 compose 里新增 postgres 服务）
+      PG_HOST: "${PG_HOST:-host.docker.internal}"
+      PG_PORT: "${PG_PORT:-5430}"
+      PG_USER: "${PG_USER:-quant}"
+      PG_PASSWORD: "${PG_PASSWORD:?请在 .env 设置 PG_PASSWORD}"
+      PG_DB: "${PG_DB:-meishi_app}"
+      DATABASE_URL: "${DATABASE_URL:-}"
       APP_TIMEZONE: "${APP_TIMEZONE:-Asia/Shanghai}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD:-meike2026}"
-      DATA_DIR: "/app/data"
       CHAT_AUTO_REPLY: "${CHAT_AUTO_REPLY:-true}"
       MESSAGE_RATE_LIMIT: "${MESSAGE_RATE_LIMIT:-20}"
+      USER_SESSION_SECRET: "${USER_SESSION_SECRET:-}"
+      USER_SESSION_DAYS: "${USER_SESSION_DAYS:-30}"
+      SMS_PROVIDER: "${SMS_PROVIDER:-auto}"
+      SMS_DEBUG: "${SMS_DEBUG:-false}"
+      SMS_CODE_TTL_SECONDS: "${SMS_CODE_TTL_SECONDS:-300}"
+      SMS_TEMPLATE_PARAMS: "${SMS_TEMPLATE_PARAMS:-auto}"
+      TENCENT_SMS_SECRET_ID: "${TENCENT_SMS_SECRET_ID:-}"
+      TENCENT_SMS_SECRET_KEY: "${TENCENT_SMS_SECRET_KEY:-}"
+      TENCENT_SMS_SDK_APP_ID: "${TENCENT_SMS_SDK_APP_ID:-1401204550}"
+      TENCENT_SMS_SIGN_NAME: "${TENCENT_SMS_SIGN_NAME:-云南美刻网络科技}"
+      TENCENT_SMS_LOGIN_TEMPLATE_ID: "${TENCENT_SMS_LOGIN_TEMPLATE_ID:-2744631}"
+      TENCENT_SMS_REGION: "${TENCENT_SMS_REGION:-ap-guangzhou}"
+      TENCENT_SMS_TIMEOUT: "${TENCENT_SMS_TIMEOUT:-5}"
       COMPANY_NAME: "${COMPANY_NAME:-云南美刻网络科技有限公司}"
       COMPANY_SHORT: "${COMPANY_SHORT:-美刻科技}"
       COMPANY_EN: "${COMPANY_EN:-MEIKE TECH}"
@@ -20,14 +42,15 @@ services:
       COMPANY_ADDRESS: "${COMPANY_ADDRESS:-}"
       COMPANY_ICP: "${COMPANY_ICP:-}"
       SITE_URL: "${SITE_URL:-}"
+    extra_hosts:
+      # 让容器里的 host.docker.internal 指向宿主机（PG 发布在 127.0.0.1:5430）
+      - "host.docker.internal:host-gateway"
     ports:
       # 只监听本机，交给 Nginx 反向代理；直接对外访问可改成 "8700:8700"
       - "127.0.0.1:${APP_PORT:-8700}:8700"
-    volumes:
-      - ./data:/app/data
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8700/healthz', timeout=3)"]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s

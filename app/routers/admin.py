@@ -48,6 +48,7 @@ def require_admin(x_admin_token: str = Header(default="")) -> None:
 def _conversation_payload(row) -> dict:
     return {
         "session_id": row["session_id"],
+        "user_id": row["user_id"],
         "name": row["name"],
         "contact": row["contact"],
         "source": row["source"],

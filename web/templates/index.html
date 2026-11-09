@@ -68,6 +68,11 @@
 
       <div class="header-actions">
         <span class="header-status"><i></i> 工作日 9:00–21:00 在线</span>
+        {% if user %}
+        <a class="header-login" href="/account">我的</a>
+        {% else %}
+        <a class="header-login" href="/login">登录</a>
+        {% endif %}
         <button type="button" class="btn btn-primary btn-sm" data-chat-open>
           <svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg>
           免费咨询

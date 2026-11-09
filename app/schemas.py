@@ -72,3 +72,22 @@ class AdminReplyIn(BaseModel):
         if not cleaned:
             raise ValueError("回复内容不能为空")
         return cleaned
+
+
+class SendCodeIn(BaseModel):
+    phone: str = Field(min_length=1, max_length=30)
+
+    @field_validator("phone")
+    @classmethod
+    def strip_phone(cls, value: str) -> str:
+        return value.strip()
+
+
+class PhoneLoginIn(BaseModel):
+    phone: str = Field(min_length=1, max_length=30)
+    code: str = Field(min_length=4, max_length=8)
+
+    @field_validator("phone", "code")
+    @classmethod
+    def strip_fields(cls, value: str) -> str:
+        return value.strip()

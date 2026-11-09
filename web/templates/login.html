@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#0a1633">
+  <meta name="robots" content="noindex, nofollow">
+  <title>手机号登录 · {{ company.short }}</title>
+  <meta name="description" content="使用手机号和短信验证码登录 {{ company.name }} 客户账号。">
+  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="auth-page" data-next="{{ next }}" data-sms-debug="{{ 'true' if sms_debug else 'false' }}">
+  <main class="auth-shell">
+    <aside class="auth-aside">
+      <div class="auth-aside-glow" aria-hidden="true"></div>
+      <div class="auth-aside-grid" aria-hidden="true"></div>
+
+      <a class="brand brand-light auth-brand" href="/" aria-label="{{ company.short }} 首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M10.5 28.5V13l9.5 10 9.5-10v15.5" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="20" cy="32" r="1.8" fill="white"/>
+          </svg>
+        </span>
+        <span class="brand-text"><strong>{{ company.short }}</strong><small>{{ company.en }}</small></span>
+      </a>
+
+      <div class="auth-aside-copy">
+        <span class="eyebrow eyebrow-light">客户账号</span>
+        <h1>登录后，<br>咨询记录随时可查</h1>
+        <p>使用手机号和短信验证码登录。第一次登录会自动创建账号，不需要设置密码。</p>
+        <ul class="auth-points">
+          <li><span class="auth-check">✓</span>手机号就是账号，登录更简单</li>
+          <li><span class="auth-check">✓</span>在线咨询与留资记录统一归档</li>
+          <li><span class="auth-check">✓</span>联系方式只用于沟通，不做群发</li>
+        </ul>
+      </div>
+
+      <span class="auth-aside-foot">© {{ year }} {{ company.name }}</span>
+    </aside>
+
+    <section class="auth-main">
+      <div class="auth-card">
+        <a class="auth-back" href="/">← 返回公司主页</a>
+
+        <a class="brand auth-mobile-brand" href="/" aria-label="{{ company.short }} 首页">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <path d="M10.5 28.5V13l9.5 10 9.5-10v15.5" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="20" cy="32" r="1.8" fill="white"/>
+            </svg>
+          </span>
+          <span class="brand-text"><strong>{{ company.short }}</strong><small>{{ company.en }}</small></span>
+        </a>
+
+        <div class="auth-head">
+          <span class="auth-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="7" y="2.5" width="10" height="19" rx="2.6"/>
+              <path d="M10.5 18.6h3"/>
+            </svg>
+          </span>
+          <h2>手机号登录</h2>
+          <p>未注册的手机号将自动创建账号</p>
+        </div>
+
+        <form class="auth-form" id="login-form" novalidate>
+          <label for="phone">手机号</label>
+          <div class="phone-field">
+            <span class="phone-prefix">+86</span>
+            <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="11" placeholder="请输入 11 位手机号" required>
+          </div>
+
+          <label for="code">短信验证码</label>
+          <div class="code-field">
+            <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="请输入 6 位验证码" required>
+            <button type="button" class="code-send" id="send-code">获取验证码</button>
+          </div>
+
+          <p class="auth-error" id="auth-error" role="alert" hidden></p>
+          <p class="auth-debug" id="auth-debug" hidden></p>
+
+          <button type="submit" class="btn btn-primary btn-block auth-submit" id="login-submit">登录 / 注册</button>
+          <p class="auth-agree">登录即表示同意我们仅将手机号用于账号登录与咨询联系。</p>
+        </form>
+
+        <p class="auth-switch">还没有账号？填写手机号验证后会自动创建。</p>
+        <a class="auth-chat-link" href="/?chat=1">先不登录，直接在线咨询 →</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/js/auth.js" defer></script>
+</body>
+</html>

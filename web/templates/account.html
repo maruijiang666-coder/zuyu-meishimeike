@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#0a1633">
+  <meta name="robots" content="noindex, nofollow">
+  <title>我的账号 · {{ company.short }}</title>
+  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="account-page">
+  <header class="account-header">
+    <div class="container account-header-inner">
+      <a class="brand" href="/" aria-label="{{ company.short }} 首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M10.5 28.5V13l9.5 10 9.5-10v15.5" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="20" cy="32" r="1.8" fill="white"/>
+          </svg>
+        </span>
+        <span class="brand-text"><strong>{{ company.short }}</strong><small>{{ company.en }}</small></span>
+      </a>
+      <div class="account-header-actions">
+        <a class="account-home-link" href="/">返回首页</a>
+        <button type="button" class="btn btn-ghost btn-sm" id="logout-btn">退出登录</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="account-main">
+    <section class="account-hero">
+      <div class="account-hero-glow" aria-hidden="true"></div>
+      <span class="account-avatar" aria-hidden="true">美</span>
+      <div class="account-hero-copy">
+        <span class="eyebrow eyebrow-light">我的账号</span>
+        <h1>你好，{{ user.nickname }}</h1>
+        <p>{{ user.masked_phone }} · 已通过手机号验证</p>
+        <div class="account-meta">
+          <span>加入时间 {{ user_since }}</span>
+          <span>{{ conversations|length }} 条咨询记录</span>
+        </div>
+      </div>
+      <a class="btn btn-light account-hero-cta" href="/?chat=1">继续咨询</a>
+    </section>
+
+    <section class="account-section">
+      <div class="account-section-head">
+        <div>
+          <span class="eyebrow">咨询记录</span>
+          <h2>我的咨询</h2>
+        </div>
+        <p>登录状态下发起的对话会自动保存在这里。</p>
+      </div>
+
+      {% if conversations %}
+      <div class="account-list">
+        {% for item in conversations %}
+        <article class="account-item">
+          <div class="account-item-top">
+            <span class="account-source{% if item.source == 'form' %} form{% endif %}">{{ item.source_label }}</span>
+            <time>{{ item.updated_label }}</time>
+          </div>
+          <p class="account-preview">{{ item.preview }}</p>
+          <div class="account-item-foot">
+            <span>{{ item.message_count }} 条消息</span>
+            {% if item.unread_visitor %}
+            <a class="account-new" href="/?chat=1">有新的回复 →</a>
+            {% endif %}
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="account-empty">
+        <span class="account-empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.5 11.2c0 4-3.8 7.2-8.5 7.2-1.1 0-2.2-.17-3.2-.48L4 20l1.3-3.6A6.7 6.7 0 0 1 3.5 11.2c0-4 3.8-7.2 8.5-7.2s8.5 3.2 8.5 7.2Z"/>
+          </svg>
+        </span>
+        <h3>还没有咨询记录</h3>
+        <p>登录状态下发起的咨询会自动保存，方便你随时回看。</p>
+        <a class="btn btn-primary" href="/?chat=1">开始咨询</a>
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="account-note">
+      <div>
+        <span class="eyebrow">账号说明</span>
+        <h2>一个手机号，一个账号</h2>
+        <p>本账号仅支持手机号 + 短信验证码登录，不设置密码。</p>
+      </div>
+      <ul>
+        <li><span class="auth-check">✓</span>手机号仅用于登录与本次咨询联系</li>
+        <li><span class="auth-check">✓</span>咨询内容保存在我们的客服系统中</li>
+        <li><span class="auth-check">✓</span>如需更换手机号，请联系顾问处理</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="account-footer">
+    <span>© {{ year }} {{ company.name }}</span>
+    <a href="/">返回公司主页</a>
+  </footer>
+
+  <script src="/static/js/auth.js" defer></script>
+</body>
+</html>

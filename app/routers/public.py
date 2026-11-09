@@ -6,6 +6,7 @@ import uuid
 
 from fastapi import APIRouter, HTTPException, Query, Request
 
+from app.auth import get_current_user
 from app.chatbot import auto_reply
 from app.config import get_settings
 from app.db import get_conn
@@ -20,6 +21,7 @@ from app.repository import (
     update_contact,
 )
 from app.schemas import ChatMessageIn, ChatSessionIn, ContactIn, LeadIn
+from app.user_repo import link_conversation_user
 
 router = APIRouter()
 
@@ -46,10 +48,15 @@ def health() -> dict[str, str]:
 
 
 @router.post("/chat/sessions")
-def create_session(payload: ChatSessionIn) -> dict[str, str]:
+def create_session(payload: ChatSessionIn, request: Request) -> dict[str, str]:
     session_id = payload.session_id or uuid.uuid4().hex
+    user = get_current_user(request)
     with get_conn() as conn:
-        ensure_conversation(conn, session_id, payload.source, payload.page)
+        conversation = ensure_conversation(conn, session_id, payload.source, payload.page)
+        if user is not None:
+            link_conversation_user(
+                conn, conversation["id"], int(user["id"]), user["phone"], user["nickname"]
+            )
     return {"session_id": session_id}
 
 
@@ -79,8 +86,13 @@ def unread_count(session_id: str) -> dict[str, int]:
 @router.post("/chat/sessions/{session_id}/messages")
 def send_message(session_id: str, payload: ChatMessageIn, request: Request) -> dict:
     _ensure_rate_limit(message_limiter, f"msg:{client_ip(request)}", "发送太频繁了，请稍后再试")
+    user = get_current_user(request)
     with get_conn() as conn:
         conversation = ensure_conversation(conn, session_id)
+        if user is not None:
+            link_conversation_user(
+                conn, conversation["id"], int(user["id"]), user["phone"], user["nickname"]
+            )
         message = add_message(conn, conversation, "visitor", payload.content)
 
         reply = None
@@ -94,8 +106,13 @@ def send_message(session_id: str, payload: ChatMessageIn, request: Request) -> d
 @router.post("/chat/sessions/{session_id}/contact")
 def save_contact(session_id: str, payload: ContactIn, request: Request) -> dict:
     _ensure_rate_limit(contact_limiter, f"contact:{client_ip(request)}", "操作太频繁，请稍后再试")
+    user = get_current_user(request)
     with get_conn() as conn:
         conversation = ensure_conversation(conn, session_id)
+        if user is not None:
+            link_conversation_user(
+                conn, conversation["id"], int(user["id"]), user["phone"], user["nickname"]
+            )
         update_contact(conn, conversation, payload.name, payload.contact)
         name = payload.name or "你"
         reply = add_message(
@@ -112,10 +129,15 @@ def create_lead(payload: LeadIn, request: Request) -> dict:
     """Contact form submission: lands in the same admin inbox as chat."""
     _ensure_rate_limit(lead_limiter, f"lead:{client_ip(request)}", "提交太频繁了，请稍后再试")
     settings = get_settings()
+    user = get_current_user(request)
     requirement = payload.requirement or "希望了解技术服务与报价"
     session_id = f"form-{uuid.uuid4().hex}"
     with get_conn() as conn:
         conversation = ensure_conversation(conn, session_id, source=payload.source, page="contact-form")
+        if user is not None:
+            link_conversation_user(
+                conn, conversation["id"], int(user["id"]), user["phone"], user["nickname"]
+            )
         update_contact(conn, conversation, payload.name, payload.contact)
         add_message(conn, conversation, "visitor", f"【官网表单】{requirement}")
     # Make sure a misconfigured (external) message never leaks the admin path.

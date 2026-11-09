@@ -6,12 +6,10 @@ __pycache__/
 venv/
 env/
 
-# Environment & local data
+# Environment
 .env
-data/*
-!data/.gitkeep
 
-# Tooling caches
+# Python tooling caches
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
