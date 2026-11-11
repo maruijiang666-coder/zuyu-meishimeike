@@ -5,9 +5,10 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 import logging
+import re
 from zoneinfo import ZoneInfo
 
-from fastapi import FastAPI, Query, Request, Response
+from fastapi import FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -203,6 +204,24 @@ def account_page(request: Request) -> Response:
 @app.get("/favicon.ico")
 def favicon() -> RedirectResponse:
     return RedirectResponse(url="/static/img/favicon.svg", status_code=307)
+
+
+@app.api_route(
+    "/MP_verify_{token}.txt",
+    methods=["GET", "HEAD"],
+    response_class=PlainTextResponse,
+)
+def wechat_domain_verify(token: str) -> PlainTextResponse:
+    """WeChat JS-safe-domain / business-domain ownership verification file."""
+    if not re.fullmatch(r"[A-Za-z0-9]{8,64}", token):
+        raise HTTPException(status_code=404, detail="文件不存在")
+    path = WEB_DIR / f"MP_verify_{token}.txt"
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="文件不存在")
+    return PlainTextResponse(
+        path.read_text(encoding="utf-8").strip(),
+        media_type="text/plain; charset=utf-8",
+    )
 
 
 @app.get("/robots.txt", response_class=PlainTextResponse)

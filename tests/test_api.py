@@ -18,6 +18,15 @@ def test_health(client):
     assert response.json() == {"status": "ok"}
 
 
+def test_wechat_domain_verification_file(client):
+    response = client.get("/MP_verify_x5O6N38Tp8mbePry.txt")
+    assert response.status_code == 200
+    assert response.text == "x5O6N38Tp8mbePry"
+    assert "text/plain" in response.headers["content-type"]
+    assert client.head("/MP_verify_x5O6N38Tp8mbePry.txt").status_code == 200
+    assert client.get("/MP_verify_doesnotexist.txt").status_code == 404
+
+
 def test_chat_conversation_flow(client, admin_headers):
     session = "pytest-session-0001"
     response = client.post("/api/chat/sessions", json={"session_id": session})
